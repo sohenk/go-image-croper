@@ -1,51 +1,13 @@
-# Kratos Project Template
+# 图片压缩程序
 
-## Install Kratos
-```
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
-```
-## Create a service
-```
-# Create a template project
-kratos new server
+## 使用Kratos开发的一个图片压缩程序
 
-cd server
-# Add a proto template
-kratos proto add api/server/server.proto
-# Generate the proto code
-kratos proto client api/server/server.proto
-# Generate the source code of service by proto file
-kratos proto server api/server/server.proto -t internal/service
-
-go generate ./...
-go build -o ./bin/ ./...
-./bin/server -conf ./configs
+## 启动方式
 ```
-## Generate other auxiliary files by Makefile
+go build 了之后直接把二进制文件丢到服务器运行即可。
 ```
-# Download and update dependencies
-make init
-# Generate API files (include: pb.go, http, grpc, validate, swagger) by proto file
-make api
-# Generate all files
-make all
+## 获取图片链接
 ```
-## Automated Initialization (wire)
+<scema>://url/getcropimg?url=<图片地址>&width=<显示图片宽度>
 ```
-# install wire
-go get github.com/google/wire/cmd/wire
-
-# generate wire
-cd cmd/server
-wire
-```
-
-## Docker
-```bash
-# build
-docker build -t <your-docker-image-name> .
-
-# run
-docker run --rm -p 8000:8000 -p 9000:9000 -v </path/to/your/configs>:/data/conf <your-docker-image-name>
-```
-
+## 直接把图片路径放在img的src上即刻显示图片
