@@ -1,0 +1,44 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/apps/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Imgcroper API
+    version: 0.0.1
+paths:
+    /getcropimg:
+        get:
+            tags:
+                - Imgcroper
+            operationId: Imgcroper_CropImg
+            parameters:
+                - name: url
+                  in: query
+                  schema:
+                    type: string
+                - name: width
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CropImgReply'
+components:
+    schemas:
+        CropImgReply:
+            type: object
+            properties:
+                imgname:
+                    type: string
+                imagetype:
+                    type: string
+                imgdata:
+                    type: string
+                    format: bytes
+tags:
+    - name: Imgcroper

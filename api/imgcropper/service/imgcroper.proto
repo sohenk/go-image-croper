@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+package api.imgcropper.service;
+import "validate/validate.proto";
+
+option go_package = "newkratos/api/imgcropper/service;service";
+option java_multiple_files = true;
+option java_package = "api.imgcropper.service";
+
+service Imgcroper {
+	rpc CropImg (CropImgRequest) returns (CropImgReply){
+		option (google.api.http) = {
+			get: "/getcropimg";
+		};
+	}
+}
+
+message CropImgRequest {
+	string url=1[(validate.rules).string ={min_len: 1}];;
+	int64 width=2[(validate.rules).int64.gte = 1];;
+}
+message CropImgReply {
+	string imgname=1;
+	string imagetype=2;
+	bytes imgdata=3;
+}
+
