@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.2
-// source: api/imgcropper/service/imgcropper.proto
+// source: imgcropper.proto
 
 package service
 
@@ -101,5 +101,5 @@ var Imgcropper_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/imgcropper/service/imgcropper.proto",
+	Metadata: "imgcropper.proto",
 }

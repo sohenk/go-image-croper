@@ -2,6 +2,12 @@ package main
 
 import (
 	"flag"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	traceSdk "go.opentelemetry.io/otel/sdk/trace"
+	semConv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"os"
 
 	"imgcropper/internal/conf"
@@ -71,6 +77,14 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+	var tc conf.Trace
+	if err := c.Scan(&tc); err != nil {
+		panic(err)
+	}
+	//_, err := NewTracerProvider(&tc, Name, Version, id)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
 	if err != nil {
@@ -82,4 +96,26 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
+}
+
+func NewTracerProvider(tc *conf.Trace, name, version, id string) (*traceSdk.TracerProvider, error) {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(tc.Endpoint)))
+	if err != nil {
+		return nil, err
+	}
+
+	tp := traceSdk.NewTracerProvider(
+		traceSdk.WithSampler(traceSdk.ParentBased(traceSdk.TraceIDRatioBased(1.0))),
+		traceSdk.WithBatcher(exp),
+		traceSdk.WithResource(resource.NewSchemaless(
+			semConv.ServiceNameKey.String(name),
+			semConv.ServiceVersionKey.String(version),
+			semConv.ServiceInstanceIDKey.String(id),
+			attribute.String("env", "dev"),
+		)),
+	)
+
+	otel.SetTracerProvider(tp)
+
+	return tp, nil
 }

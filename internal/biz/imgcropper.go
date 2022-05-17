@@ -3,6 +3,7 @@ package biz
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -58,7 +59,11 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 }
 func ResizeImg(url string, width int64) ([]byte, string, error) {
 
-	resp, err := http.Get(url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, "", err
 	}
