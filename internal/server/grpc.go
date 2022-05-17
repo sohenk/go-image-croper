@@ -1,16 +1,17 @@
 package server
 
 import (
+	v1 "imgcropper/api/imgcropper/service"
+	"imgcropper/internal/conf"
+	"imgcropper/internal/service"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	v1 "newkratos/api/imgcropper/service"
-	"newkratos/internal/conf"
-	"newkratos/internal/service"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.ImgcroperService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, greeter *service.ImgcropperService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -26,6 +27,6 @@ func NewGRPCServer(c *conf.Server, greeter *service.ImgcroperService, logger log
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterImgcroperServer(srv, greeter)
+	v1.RegisterImgcropperServer(srv, greeter)
 	return srv
 }

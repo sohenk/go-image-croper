@@ -1,8 +1,9 @@
 package data
 
 import (
+	"imgcropper/internal/biz"
+
 	"github.com/go-kratos/kratos/v2/log"
-	"newkratos/internal/biz"
 )
 
 type imgCropRepo struct {

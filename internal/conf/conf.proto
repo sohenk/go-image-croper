@@ -1,7 +1,7 @@
 syntax = "proto3";
 package kratos.api;
 
-option go_package = "newkratos/internal/conf;conf";
+option go_package = "imgcropper/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 

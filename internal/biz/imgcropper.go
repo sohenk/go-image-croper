@@ -3,19 +3,19 @@ package biz
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/nfnt/resize"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	pb "imgcropper/api/imgcropper/service"
 	"net/http"
-	pb "newkratos/api/imgcropper/service"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/nfnt/resize"
 )
 
 var (
@@ -78,15 +78,7 @@ func ResizeImg(url string, width int64) ([]byte, string, error) {
 	thumbnailSize := int(width)
 	var newImage image.Image
 
-	//if thumbnailSize < img.Bounds().Dx() || thumbnailSize < img.Bounds().Dy() {
-	//	if img.Bounds().Dx() > img.Bounds().Dy() {
 	newImage = resize.Resize(uint(thumbnailSize), 0, img, resize.Lanczos3)
-	//} else {
-	//	newImage = resize.Resize(0, uint(thumbnailSize), img, resize.Lanczos3)
-	//}
-	//} else {
-	//	newImage = img
-	//}
 	w := new(bytes.Buffer)
 	switch filetype {
 	case "png":
@@ -101,7 +93,7 @@ func ResizeImg(url string, width int64) ([]byte, string, error) {
 	//	err = tiff.Encode(w, newImage, nil)
 	default:
 		// not sure how you got here but what are we going to do with you?
-		fmt.Println("Unknown image type: ", filetype)
+		// fmt.Println("Unknown image type: ", filetype)
 		err = errors.New(500, "Picture Invalid", "图片格式有误")
 		//io.Copy(w, file)
 	}
@@ -110,6 +102,6 @@ func ResizeImg(url string, width int64) ([]byte, string, error) {
 		log.Error(err)
 		return nil, "", errors.New(500, "Picture Invalid", "图片格式有误")
 	}
-	fmt.Println("filetype", filetype)
+	// fmt.Println("filetype", filetype)
 	return w.Bytes(), filetype, nil
 }

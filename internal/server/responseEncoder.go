@@ -1,8 +1,8 @@
 package server
 
 import (
+	pb "imgcropper/api/imgcropper/service"
 	nethttp "net/http"
-	pb "newkratos/api/imgcropper/service"
 )
 
 func responseEncoder(w nethttp.ResponseWriter, r *nethttp.Request, v interface{}) error {

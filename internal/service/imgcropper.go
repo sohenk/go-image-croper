@@ -2,30 +2,31 @@ package service
 
 import (
 	"context"
+	"imgcropper/internal/biz"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"newkratos/internal/biz"
 
-	pb "newkratos/api/imgcropper/service"
+	pb "imgcropper/api/imgcropper/service"
 )
 
-type ImgcroperService struct {
-	pb.UnimplementedImgcroperServer
+type ImgcropperService struct {
+	pb.UnimplementedImgcropperServer
 	uc  *biz.CropImgUsecase
 	log *log.Helper
 }
 
-func NewImgcroperService(
+func NewImgcropperService(
 	uc *biz.CropImgUsecase,
 	logger log.Logger,
-) *ImgcroperService {
-	return &ImgcroperService{
+) *ImgcropperService {
+	return &ImgcropperService{
 		uc:  uc,
 		log: log.NewHelper(log.With(logger, "module", "service/imagecropper")),
 	}
 }
 
-func (s *ImgcroperService) CropImg(ctx context.Context, req *pb.CropImgRequest) (*pb.CropImgReply, error) {
+func (s *ImgcropperService) CropImg(ctx context.Context, req *pb.CropImgRequest) (*pb.CropImgReply, error) {
 	if req.Url == "" {
 		return nil, errors.Newf(400, "No Url", "Url must be not empty")
 	}

@@ -1,9 +1,10 @@
 package data
 
 import (
+	"imgcropper/internal/conf"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
-	"newkratos/internal/conf"
 )
 
 // ProviderSet is data providers.

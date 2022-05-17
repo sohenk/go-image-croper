@@ -3,14 +3,14 @@
 
 openapi: 3.0.3
 info:
-    title: Imgcroper API
+    title: Imgcropper API
     version: 0.0.1
 paths:
     /getcropimg:
         get:
             tags:
-                - Imgcroper
-            operationId: Imgcroper_CropImg
+                - Imgcropper
+            operationId: Imgcropper_CropImg
             parameters:
                 - name: url
                   in: query
@@ -41,4 +41,4 @@ components:
                     type: string
                     format: bytes
 tags:
-    - name: Imgcroper
+    - name: Imgcropper

@@ -9,11 +9,11 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"newkratos/internal/biz"
-	"newkratos/internal/conf"
-	"newkratos/internal/data"
-	"newkratos/internal/server"
-	"newkratos/internal/service"
+	"imgcropper/internal/biz"
+	"imgcropper/internal/conf"
+	"imgcropper/internal/data"
+	"imgcropper/internal/server"
+	"imgcropper/internal/service"
 )
 
 // Injectors from wire.go:
@@ -26,9 +26,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	cropImgRepo := data.NewImgCropRepo(dataData, logger)
 	cropImgUsecase := biz.NewCropImgUsecase(cropImgRepo, logger)
-	imgcroperService := service.NewImgcroperService(cropImgUsecase, logger)
-	httpServer := server.NewHTTPServer(confServer, imgcroperService, logger)
-	grpcServer := server.NewGRPCServer(confServer, imgcroperService, logger)
+	imgcropperService := service.NewImgcropperService(cropImgUsecase, logger)
+	httpServer := server.NewHTTPServer(confServer, imgcropperService, logger)
+	grpcServer := server.NewGRPCServer(confServer, imgcropperService, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
 		cleanup()

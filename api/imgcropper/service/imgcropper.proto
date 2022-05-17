@@ -4,11 +4,11 @@ import "google/api/annotations.proto";
 package api.imgcropper.service;
 import "validate/validate.proto";
 
-option go_package = "newkratos/api/imgcropper/service;service";
+option go_package = "cropper/api/imgcropper/service;service";
 option java_multiple_files = true;
 option java_package = "api.imgcropper.service";
 
-service Imgcroper {
+service Imgcropper {
 	rpc CropImg (CropImgRequest) returns (CropImgReply){
 		option (google.api.http) = {
 			get: "/getcropimg";

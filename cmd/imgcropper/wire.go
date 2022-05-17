@@ -9,11 +9,11 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
-	"newkratos/internal/biz"
-	"newkratos/internal/conf"
-	"newkratos/internal/data"
-	"newkratos/internal/server"
-	"newkratos/internal/service"
+	"imgcropper/internal/biz"
+	"imgcropper/internal/conf"
+	"imgcropper/internal/data"
+	"imgcropper/internal/server"
+	"imgcropper/internal/service"
 )
 
 // wireApp init kratos application.

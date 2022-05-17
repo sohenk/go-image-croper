@@ -17,22 +17,22 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-type ImgcroperHTTPServer interface {
+type ImgcropperHTTPServer interface {
 	CropImg(context.Context, *CropImgRequest) (*CropImgReply, error)
 }
 
-func RegisterImgcroperHTTPServer(s *http.Server, srv ImgcroperHTTPServer) {
+func RegisterImgcropperHTTPServer(s *http.Server, srv ImgcropperHTTPServer) {
 	r := s.Route("/")
-	r.GET("/getcropimg", _Imgcroper_CropImg0_HTTP_Handler(srv))
+	r.GET("/getcropimg", _Imgcropper_CropImg0_HTTP_Handler(srv))
 }
 
-func _Imgcroper_CropImg0_HTTP_Handler(srv ImgcroperHTTPServer) func(ctx http.Context) error {
+func _Imgcropper_CropImg0_HTTP_Handler(srv ImgcropperHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in CropImgRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/api.imgcropper.service.Imgcroper/CropImg")
+		http.SetOperation(ctx, "/api.imgcropper.service.Imgcropper/CropImg")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.CropImg(ctx, req.(*CropImgRequest))
 		})
@@ -45,23 +45,23 @@ func _Imgcroper_CropImg0_HTTP_Handler(srv ImgcroperHTTPServer) func(ctx http.Con
 	}
 }
 
-type ImgcroperHTTPClient interface {
+type ImgcropperHTTPClient interface {
 	CropImg(ctx context.Context, req *CropImgRequest, opts ...http.CallOption) (rsp *CropImgReply, err error)
 }
 
-type ImgcroperHTTPClientImpl struct {
+type ImgcropperHTTPClientImpl struct {
 	cc *http.Client
 }
 
-func NewImgcroperHTTPClient(client *http.Client) ImgcroperHTTPClient {
-	return &ImgcroperHTTPClientImpl{client}
+func NewImgcropperHTTPClient(client *http.Client) ImgcropperHTTPClient {
+	return &ImgcropperHTTPClientImpl{client}
 }
 
-func (c *ImgcroperHTTPClientImpl) CropImg(ctx context.Context, in *CropImgRequest, opts ...http.CallOption) (*CropImgReply, error) {
+func (c *ImgcropperHTTPClientImpl) CropImg(ctx context.Context, in *CropImgRequest, opts ...http.CallOption) (*CropImgReply, error) {
 	var out CropImgReply
 	pattern := "/getcropimg"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation("/api.imgcropper.service.Imgcroper/CropImg"))
+	opts = append(opts, http.Operation("/api.imgcropper.service.Imgcropper/CropImg"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

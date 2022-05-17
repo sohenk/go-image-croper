@@ -1,4 +1,4 @@
-module newkratos
+module imgcropper
 
 go 1.17
 
