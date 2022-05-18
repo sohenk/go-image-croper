@@ -47,7 +47,9 @@ type CropImgUsecase struct {
 }
 
 func NewCropImgUsecase(repo CropImgRepo, logger log.Logger) *CropImgUsecase {
-	return &CropImgUsecase{repo: repo, log: log.NewHelper(logger)}
+	return &CropImgUsecase{repo: repo,
+		log: log.NewHelper(log.With(logger, "module", "usecase/imgcrop")),
+	}
 }
 
 func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int64) (*pb.CropImgReply, error) {
@@ -60,7 +62,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 	newname := name + "_w" + "_ " + strconv.Itoa(int(width)) + ext
 
 	oname := name + ext
-
+	//uc.log.Debug(md5filename)
 	if uc.repo.GetMd5Url(ctx, md5filename) {
 
 		//数据库是否记录过该缩略图
@@ -93,13 +95,14 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		//原图是否在本地有副本
 		originimgcroplog, err := uc.repo.GetFileSize(ctx, md5filename, 0)
 		if err != nil {
+			uc.log.Error(err)
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				uc.log.Error(err)
 				return nil, errors.New(500, "dberror", "数据库出错了")
 			}
 			//原图不存在创建原图
 			newimg, filetype, err := imagehelper.GetImgFromUrl(url)
 			if err != nil {
+				uc.log.Error(err)
 				return nil, err
 			}
 			newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
@@ -116,6 +119,9 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				//上传成功则保存原图记录到数据库
 				if err == nil {
 					uc.repo.CreateFileLog(ctx, originimgcroplog)
+				} else {
+
+					uc.log.Error(err)
 				}
 			}
 
@@ -131,6 +137,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				//存放原图到服务器
 				newimg, filetype, err := imagehelper.GetImgFromUrl(url)
 				if err != nil {
+					uc.log.Error(err)
 					return nil, err
 				}
 				diskbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
@@ -138,6 +145,8 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				if err == nil {
 					//获取流没问题保存多次去服务器
 					uc.repo.StoreImg(ctx, oname, diskbyte)
+				} else {
+					uc.log.Error(err)
 				}
 				obyte = diskbyte
 			} else {
@@ -146,6 +155,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		}
 		newimg, filetype, err := imagehelper.ByteToImage(obyte)
 		if err != nil {
+			uc.log.Error(err)
 			return nil, err
 		}
 		//压缩图片
@@ -165,6 +175,8 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				})
 			}
 
+		} else {
+			uc.log.Error(err)
 		}
 		return &pb.CropImgReply{Imgdata: resizedimgbyte, Imgname: newname, Imagetype: filetype}, nil
 
@@ -172,6 +184,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		//存放原图到服务器
 		newimg, filetype, err := imagehelper.GetImgFromUrl(url)
 		if err != nil {
+			uc.log.Error(err)
 			return nil, err
 		}
 		newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
@@ -187,6 +200,8 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 					FileType:  filetype,
 				})
 			}
+		} else {
+			uc.log.Error(err)
 		}
 		//压缩图片
 		resizedimg := imagehelper.ResizeImg(newimg, width)
@@ -203,8 +218,14 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 					Width:     uint64(width),
 					FileType:  filetype,
 				})
+			} else {
+
+				uc.log.Error(err)
 			}
 
+		} else {
+
+			uc.log.Error(err)
 		}
 		return &pb.CropImgReply{Imgdata: resizedimgbyte, Imgname: newname, Imagetype: filetype}, nil
 

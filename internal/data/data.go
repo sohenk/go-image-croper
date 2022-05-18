@@ -30,6 +30,7 @@ func NewData(c *conf.Data, logger log.Logger, db *gorm.DB, ftp *ftpdriver.FtpInf
 	return &Data{
 		db:  db,
 		ftp: ftp,
+		log: log.NewHelper(log.With(logger, "module", "data/imgcrop")),
 	}, cleanup, nil
 }
 func NewFtpClient(c *conf.FileSystem) (*ftpdriver.FtpInfo, error) {

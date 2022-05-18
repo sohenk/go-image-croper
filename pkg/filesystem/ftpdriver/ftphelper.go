@@ -1,11 +1,9 @@
 package ftpdriver
 
 import (
-	"bufio"
 	"bytes"
-	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/jlaffaye/ftp"
-	"io"
 	"io/ioutil"
 	"strconv"
 	"time"
@@ -54,7 +52,7 @@ func NewFtpInfo(Host string, UserName string, PassWord string, Root string, Url 
 
 func (f *FtpInfo) Login() (*ftp.ServerConn, error) {
 	url := f.Host + ":" + strconv.Itoa(int(f.Port))
-	c, err := ftp.Dial(url, ftp.DialWithTimeout(5*time.Second))
+	c, err := ftp.Dial(url, ftp.DialWithTimeout(1*time.Second))
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +67,14 @@ func (f *FtpInfo) Login() (*ftp.ServerConn, error) {
 
 }
 func (f *FtpInfo) Logout() error {
+	f.Reconnet()
 	if err := f.Conn.Quit(); err != nil {
 		return err
 	}
 	return nil
 }
 func (f *FtpInfo) ReadFile(filepath string) ([]byte, error) {
+	f.Reconnet()
 	dir := f.Root + filepath
 	r, err := f.Conn.Retr(dir)
 	if err != nil {
@@ -90,9 +90,10 @@ func (f *FtpInfo) ReadFile(filepath string) ([]byte, error) {
 }
 func (f *FtpInfo) Store(
 	byteBuffer []byte,
-	//byteBuffer *bytes.Buffer,
+//byteBuffer *bytes.Buffer,
 	fileName string) (url, storePath string, err error) {
 
+	f.Reconnet()
 	err = f.EnsureFtpDirExist(f.Dir)
 	if err != nil {
 		return "", "", err
@@ -108,7 +109,7 @@ func (f *FtpInfo) Store(
 }
 
 func (f *FtpInfo) EnsureFtpDirExist(dir string) error {
-
+	f.Reconnet()
 	err := f.Conn.ChangeDir(f.Root + dir)
 	if err != nil {
 		er := f.Conn.MakeDir(f.Root + dir)
@@ -124,16 +125,13 @@ func (f *FtpInfo) EnsureFtpDirExist(dir string) error {
 
 }
 
-func (f *FtpInfo) GetFile(dir string) (io.Reader, error) {
-	dir = f.Root + dir
-
-	fmt.Println(dir)
-	res, err := f.Conn.Retr(dir)
-	if err != nil {
-		return nil, err
+func (f *FtpInfo) Reconnet() {
+	if err := f.Conn.NoOp(); err != nil {
+		log.Error(err)
+		log.Warn("ftp重新连接")
+		conn, err := f.Login()
+		if err == nil {
+			f.Conn = conn
+		}
 	}
-	defer res.Close()
-	reader := bufio.NewReader(res)
-	return reader, nil
-
 }
