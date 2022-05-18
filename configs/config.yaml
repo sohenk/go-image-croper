@@ -8,10 +8,20 @@ server:
 data:
   database:
     driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test
+    source: root:root@tcp(localhost:3306)/wxhd-kratos?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
 trace:
   endpoint: http://172.19.80.17:14268/api/traces
+filesystem:
+  driver: ftp
+  ftp:
+    host: "172.19.80.7"
+    username: "res"
+    password: "kaifa9394"
+    root: "/home/res/"
+    url: "https://res.zhrct.com/"
+    port: 21
+    dir: "imgcropper"

@@ -77,16 +77,14 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	var tc conf.Trace
-	if err := c.Scan(&tc); err != nil {
-		panic(err)
-	}
-	//_, err := NewTracerProvider(&tc, Name, Version, id)
+
+	//链路追踪
+	//_, err := NewTracerProvider(bc.Trace, Name, Version, id)
 	//if err != nil {
 	//	panic(err)
 	//}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Filesystem, logger)
 	if err != nil {
 		panic(err)
 	}

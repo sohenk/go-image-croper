@@ -8,6 +8,8 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Trace trace = 3;
+  FileSystem filesystem=4;
 }
 
 message Server {
@@ -41,4 +43,18 @@ message Data {
 }
 message Trace {
   string endpoint = 1;
+}
+
+message FileSystem {
+  string driver = 1;
+  Ftp ftp = 2;
+  message Ftp{
+         string host=1;
+     string username=2;
+     string password=3;
+         string root=4;
+          string url=5;
+         uint64 port=6;
+          string dir=7;
+  }
 }

@@ -46,6 +46,12 @@
             "required": false,
             "type": "string",
             "format": "int64"
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [

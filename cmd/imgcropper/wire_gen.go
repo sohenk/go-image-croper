@@ -19,8 +19,16 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+func wireApp(confServer *conf.Server, confData *conf.Data, fileSystem *conf.FileSystem, logger log.Logger) (*kratos.App, func(), error) {
+	db, err := data.NewDataBase(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	ftpInfo, err := data.NewFtpClient(fileSystem)
+	if err != nil {
+		return nil, nil, err
+	}
+	dataData, cleanup, err := data.NewData(confData, logger, db, ftpInfo)
 	if err != nil {
 		return nil, nil, err
 	}
