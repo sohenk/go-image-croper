@@ -15,3 +15,6 @@ go build 了之后直接把二进制文件丢到服务器运行即可。
 ```
  <img src="<scema>://url/getcropimg?url=<图片地址>&width=<显示图片宽度>"/>
 ```
+## 大概流程
+
+<img src="./flow.jpg">
