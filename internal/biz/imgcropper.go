@@ -80,6 +80,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		return &pb.CropImgReply{Imgdata: noftpbyte, Imgname: newname, Imagetype: noftpfiletype}, nil
 
 	}
+	defer ftpinfo.Conn.Quit()
 
 	//uc.log.Debug(md5filename)
 	if uc.repo.GetMd5Url(ctx, md5filename) {
