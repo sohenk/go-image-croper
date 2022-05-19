@@ -33,7 +33,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, fileSystem *conf.File
 		return nil, nil, err
 	}
 	cropImgRepo := data.NewImgCropRepo(dataData, logger)
-	cropImgUsecase := biz.NewCropImgUsecase(cropImgRepo, logger)
+	cropImgUsecase := biz.NewCropImgUsecase(cropImgRepo, fileSystem, logger)
 	imgcropperService := service.NewImgcropperService(cropImgUsecase, logger)
 	httpServer := server.NewHTTPServer(confServer, imgcropperService, logger)
 	grpcServer := server.NewGRPCServer(confServer, imgcropperService, logger)

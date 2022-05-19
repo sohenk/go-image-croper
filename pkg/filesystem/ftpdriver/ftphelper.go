@@ -52,7 +52,7 @@ func NewFtpInfo(Host string, UserName string, PassWord string, Root string, Url 
 
 func (f *FtpInfo) Login() (*ftp.ServerConn, error) {
 	url := f.Host + ":" + strconv.Itoa(int(f.Port))
-	c, err := ftp.Dial(url, ftp.DialWithTimeout(1*time.Second))
+	c, err := ftp.Dial(url, ftp.DialWithTimeout(60*time.Second))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (f *FtpInfo) ReadFile(filepath string) ([]byte, error) {
 }
 func (f *FtpInfo) Store(
 	byteBuffer []byte,
-//byteBuffer *bytes.Buffer,
+	//byteBuffer *bytes.Buffer,
 	fileName string) (url, storePath string, err error) {
 
 	f.Reconnet()

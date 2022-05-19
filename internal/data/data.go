@@ -35,10 +35,13 @@ func NewData(c *conf.Data, logger log.Logger, db *gorm.DB, ftp *ftpdriver.FtpInf
 }
 func NewFtpClient(c *conf.FileSystem) (*ftpdriver.FtpInfo, error) {
 	filesytem := c.Ftp
+
+	log.Info("初始化ftp客户端")
 	ftpinfo, err := ftpdriver.NewFtpInfo(filesytem.Host, filesytem.Username, filesytem.Password, filesytem.Root, filesytem.Url, uint(filesytem.Port), filesytem.Dir)
 	if err != nil {
 		return nil, err
 	}
+	log.Info("初始化ftp客户端成功")
 	return ftpinfo, nil
 }
 

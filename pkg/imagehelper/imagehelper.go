@@ -98,3 +98,57 @@ func ByteToImage(imgbyte []byte) (image.Image, string, error) {
 	}
 	return newimg, filetype, nil
 }
+
+func ResizeImgToByte(url string, width int64) ([]byte, string, error) {
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+	//file, err := os.Open(url)
+	//defer file.Close()
+	if err != nil {
+		log.Error(err)
+		return nil, "", errors.New(404, "not found", "file not found")
+	}
+	img, filetype, err := image.Decode(resp.Body)
+	if err != nil {
+
+		log.Error(err)
+		return nil, "", errors.New(500, "image format error", "file format error")
+	}
+	thumbnailSize := int(width)
+	var newImage image.Image
+
+	newImage = resize.Resize(uint(thumbnailSize), 0, img, resize.Lanczos3)
+	w := new(bytes.Buffer)
+	switch filetype {
+	case "png":
+		err = png.Encode(w, newImage)
+	case "gif":
+		err = gif.Encode(w, newImage, nil)
+	case "jpeg", "jpg":
+		err = jpeg.Encode(w, newImage, nil)
+	//case "bmp":
+	//	err = bmp.Encode(w, newImage)
+	//case "tiff":
+	//	err = tiff.Encode(w, newImage, nil)
+	default:
+		// not sure how you got here but what are we going to do with you?
+		// fmt.Println("Unknown image type: ", filetype)
+		err = errors.New(500, "Picture Invalid", "图片格式有误")
+		//io.Copy(w, file)
+	}
+	if err != nil {
+
+		log.Error(err)
+		return nil, "", errors.New(500, "Picture Invalid", "图片格式有误")
+	}
+	// fmt.Println("filetype", filetype)
+	return w.Bytes(), filetype, nil
+}

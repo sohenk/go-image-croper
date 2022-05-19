@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"imgcropper/internal/biz"
+	"imgcropper/pkg/filesystem/ftpdriver"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"gorm.io/gorm"
@@ -81,4 +82,15 @@ func (i *imgCropRepo) StoreImg(ctx context.Context, filename string, imagedata [
 
 func (i *imgCropRepo) GetImgFromDisk(ctx context.Context, storePath string) (imagedata []byte, err error) {
 	return i.data.ftp.ReadFile(storePath)
+}
+
+func (i *imgCropRepo) StoreImgWithFtp(ctx context.Context, ftp *ftpdriver.FtpInfo, filename string, imagedata []byte) (url, storepath string, err error) {
+
+	url, storepath, err = ftp.Store(imagedata, filename)
+
+	return url, storepath, err
+}
+
+func (i *imgCropRepo) GetImgFromDiskWithFtp(ctx context.Context, ftp *ftpdriver.FtpInfo, storePath string) (imagedata []byte, err error) {
+	return ftp.ReadFile(storePath)
 }
