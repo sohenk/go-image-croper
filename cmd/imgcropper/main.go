@@ -24,13 +24,12 @@ import (
 // go build -ldflags "-X main.Version=x.y.z"
 var (
 	// Name is the name of the compiled software.
-	Name = "imagecropper"
+	Name = "api.imgcropper.service"
 	// Version is the version of the compiled software.
 	Version = "v1.0.0"
 	// flagconf is the config flag.
 	flagconf string
-
-	id, _ = os.Hostname()
+	id, _    = os.Hostname()
 )
 
 func init() {
@@ -79,10 +78,10 @@ func main() {
 	}
 
 	//链路追踪
-	//_, err := NewTracerProvider(bc.Trace, Name, Version, id)
-	//if err != nil {
-	//	panic(err)
-	//}
+	_, err := NewTracerProvider(bc.Trace, Name, Version, id)
+	if err != nil {
+		panic(err)
+	}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Filesystem, logger)
 	if err != nil {

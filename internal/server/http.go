@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/go-kratos/kratos/v2/middleware/ratelimit"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	v1 "imgcropper/api/imgcropper/service"
 	"imgcropper/internal/conf"
@@ -14,12 +15,13 @@ import (
 
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(c *conf.Server, greeter *service.ImgcropperService, logger log.Logger) *http.Server {
+
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
 			ratelimit.Server(),
 			validate.Validator(),
-			//tracing.Server(),
+			tracing.Server(),
 		),
 		http.ResponseEncoder(responseEncoder),
 	}
