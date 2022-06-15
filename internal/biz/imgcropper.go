@@ -213,6 +213,9 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		} else {
 			uc.log.Error(err)
 		}
+		if width <= 0 {
+			return &pb.CropImgReply{Imgdata: imgio, Imgname: newname, Imagetype: filetype}, nil
+		}
 		//压缩图片
 		resizedimgbyte, filetype, err := imagehelper.ResizeImgToByteFromBytes(imgio, filetype, width)
 		if err == nil {
