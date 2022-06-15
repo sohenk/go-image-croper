@@ -120,16 +120,18 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				return nil, errors.New(500, "dberror", "数据库出错了")
 			}
 			//原图不存在创建原图
-			newimg, filetype, err := imagehelper.GetImgFromUrl(url)
-			if err != nil {
-				uc.log.Error(err)
-				return nil, err
-			}
+			// newimg, filetype, err := imagehelper.GetImgFromUrl(url)
+			// if err != nil {
+			// 	uc.log.Error(err)
+			// 	return nil, err
+			// }
 
-			newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
-			obyte = newbyte
+			// newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
+			// obyte = newbyte
+
+			obyte, filetype, err := imagehelper.GetImgFromUrlToBytes(url)
 			if err == nil {
-				_, ostorepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, newbyte)
+				_, ostorepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, obyte)
 				originimgcroplog = &ImgCropLog{
 					Source:    url,
 					StorePath: ostorepath,
@@ -156,13 +158,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				uc.log.Error(err)
 				//从服务器获取图片流失败
 				//存放原图到服务器
-				newimg, filetype, err := imagehelper.GetImgFromUrl(url)
-				if err != nil {
-					uc.log.Error(err)
-					return nil, err
-				}
-				diskbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
-
+				diskbyte, _, err := imagehelper.GetImgFromUrlToBytes(url)
 				if err == nil {
 					//获取流没问题保存多次去服务器
 					uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, diskbyte)
@@ -174,15 +170,8 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				obyte = diskbyte
 			}
 		}
-		newimg, filetype, err := imagehelper.ByteToImage(obyte)
-		if err != nil {
-			uc.log.Error(err)
-			return nil, err
-		}
-		//压缩图片
-		resizedimg := imagehelper.ResizeImg(newimg, width)
-		//上传压缩图片到服务器
-		resizedimgbyte, err := imagehelper.TransferImgToByte(resizedimg, filetype)
+
+		resizedimgbyte, filetype, err := imagehelper.ResizeImgToByteFromBytes(obyte, originimgcroplog.FileType, width)
 		if err == nil {
 			url, storepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, newname, resizedimgbyte)
 			if err == nil {
@@ -203,33 +192,14 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 
 	} else {
 
-		// uc.log.Info("1111111111111111")
-
-		// imgio, err := imagehelper.GetImgFromUrlToIoReader(url)
-		// if err != nil {
-		// 	uc.log.Error(err)
-		// 	return nil, errors.New(500, "GETPICERROR", "图片错误")
-		// }
-
-		//存放原图到服务器
-		newimg, filetype, err := imagehelper.GetImgFromUrl(url)
+		imgio, filetype, err := imagehelper.GetImgFromUrlToBytes(url)
 		if err != nil {
 			uc.log.Error(err)
-			return nil, err
+			return nil, errors.New(500, "GETPICERROR", "图片错误")
 		}
 
-		// creates a bytes.Buffer and read from io.Reader
-		// imgdt, err := imagehelper.IoReaderToBytes(imgio)
-		// if err != nil {
-		// 	uc.log.Error(err)
-		// 	return nil, err
-		// }
-
-		// uc.log.Info("2222222222222")
-		// return &pb.CropImgReply{Imgdata: imgdt, Imgname: newname, Imagetype: filetype}, nil
-		newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
 		if err == nil {
-			_, ostorepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, newbyte)
+			_, ostorepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, imgio)
 			//上传成功则保存原图记录到数据库
 			if err == nil {
 				uc.repo.CreateFileLog(ctx, &ImgCropLog{
@@ -244,9 +214,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 			uc.log.Error(err)
 		}
 		//压缩图片
-		resizedimg := imagehelper.ResizeImg(newimg, width)
-		//上传压缩图片到服务器
-		resizedimgbyte, err := imagehelper.TransferImgToByte(resizedimg, filetype)
+		resizedimgbyte, filetype, err := imagehelper.ResizeImgToByteFromBytes(imgio, filetype, width)
 		if err == nil {
 			url, storepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, newname, resizedimgbyte)
 			if err == nil {

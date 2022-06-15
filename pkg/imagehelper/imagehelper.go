@@ -7,6 +7,7 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"imgcropper/pkg/resizegif"
 	"io"
 	"net/http"
 
@@ -15,22 +16,28 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func GetImgFromUrlToIoReader(url string) (r io.Reader, er error) {
+func GetImgFromUrlToBytes(url string) (b []byte, filetype string, er error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer resp.Body.Close()
-	return resp.Body, nil
-	//buf := &bytes.Buffer{}
-	//buf.ReadFrom(resp.Body)
-	//
-	//// retrieve a byte slice from bytes.Buffer
-	//data := buf.Bytes()
+	buf := &bytes.Buffer{}
+	buf.ReadFrom(resp.Body)
+
+	// retrieve a byte slice from bytes.Buffer
+	data := buf.Bytes()
+	_, filetype, err = image.Decode(bytes.NewBuffer(data))
+	if err != nil {
+		log.Error(err)
+		return nil, "", errors.New(500, "image format error", "file format error")
+	}
+
+	return data, filetype, nil
 }
 
 //Turn ioreader to image
@@ -62,7 +69,6 @@ func GetImgFromUrl(url string) (newimg image.Image, newimgtype string, er error)
 
 	img, filetype, err := image.Decode(resp.Body)
 	if err != nil {
-
 		log.Error(err)
 		return nil, "", errors.New(500, "image format error", "file format error")
 	}
@@ -133,8 +139,10 @@ func ByteToImage(imgbyte []byte) (image.Image, string, error) {
 //ioreadertoBytes
 func IoReaderToBytes(reader io.Reader) ([]byte, error) {
 	buf := &bytes.Buffer{}
+
 	buf.ReadFrom(reader)
 	return buf.Bytes(), nil
+
 }
 
 //imagetobytes
@@ -199,6 +207,58 @@ func ResizeImgToByte(url string, width int64) ([]byte, string, error) {
 		err = png.Encode(w, newImage)
 	case "gif":
 		err = gif.Encode(w, newImage, nil)
+	case "jpeg", "jpg":
+		err = jpeg.Encode(w, newImage, nil)
+	//case "bmp":
+	//	err = bmp.Encode(w, newImage)
+	//case "tiff":
+	//	err = tiff.Encode(w, newImage, nil)
+	default:
+		// not sure how you got here but what are we going to do with you?
+		// fmt.Println("Unknown image type: ", filetype)
+		err = errors.New(500, "Picture Invalid", "图片格式有误")
+		//io.Copy(w, file)
+	}
+	if err != nil {
+
+		log.Error(err)
+		return nil, "", errors.New(500, "Picture Invalid", "图片格式有误")
+	}
+	// fmt.Println("filetype", filetype)
+	return w.Bytes(), filetype, nil
+}
+
+//bytes to ioreader
+func BytesToIoReader(img []byte) io.Reader {
+	return bytes.NewReader(img)
+
+}
+
+//resize img from bytes to bytes
+func ResizeImgToByteFromBytes(img []byte, filetype string, width int64) ([]byte, string, error) {
+	reader := bytes.NewReader(img)
+
+	newimg, filetype, err := image.Decode(reader)
+	if err != nil {
+		log.Error(err)
+		return nil, "", errors.New(500, "Picture Invalid", "图片格式有误")
+	}
+	thumbnailSize := int(width)
+	var newImage image.Image
+	if filetype != "gif" {
+		newImage = resize.Resize(uint(thumbnailSize), 0, newimg, resize.Lanczos3)
+	}
+	w := new(bytes.Buffer)
+	switch filetype {
+	case "png":
+		err = png.Encode(w, newImage)
+	case "gif":
+		gifs, err := resizegif.Resize(BytesToIoReader(img), thumbnailSize, 0)
+		if err != nil {
+			log.Error(err)
+			return nil, "", errors.New(500, "Picture Invalid", "图片转换有误")
+		}
+		err = gif.EncodeAll(w, gifs)
 	case "jpeg", "jpg":
 		err = jpeg.Encode(w, newImage, nil)
 	//case "bmp":
