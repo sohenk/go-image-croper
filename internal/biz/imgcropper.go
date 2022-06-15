@@ -96,9 +96,9 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 			}
 			//记录不存在
 
-			uc.log.Debug("没缩略图")
+			//uc.log.Debug("没缩略图")
 		} else {
-			uc.log.Debug("有缩略图")
+			//uc.log.Debug("有缩略图")
 			//有对应缩略图
 			storebyte, err := uc.repo.GetImgFromDiskWithFtp(ctx, ftpinfo, imgcroplog.StorePath)
 			if err != nil {
@@ -111,11 +111,11 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 			}
 		}
 
-		uc.log.Debug("开始创建缩略图")
+		//uc.log.Debug("开始创建缩略图")
 		//原图是否在本地有副本
 		originimgcroplog, err := uc.repo.GetFileSize(ctx, md5filename, 0)
 		if err != nil {
-			uc.log.Error(err)
+			//uc.log.Error(err)
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errors.New(500, "dberror", "数据库出错了")
 			}
@@ -125,6 +125,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 				uc.log.Error(err)
 				return nil, err
 			}
+
 			newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
 			obyte = newbyte
 			if err == nil {
@@ -201,12 +202,31 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		return &pb.CropImgReply{Imgdata: resizedimgbyte, Imgname: newname, Imagetype: filetype}, nil
 
 	} else {
+
+		// uc.log.Info("1111111111111111")
+
+		// imgio, err := imagehelper.GetImgFromUrlToIoReader(url)
+		// if err != nil {
+		// 	uc.log.Error(err)
+		// 	return nil, errors.New(500, "GETPICERROR", "图片错误")
+		// }
+
 		//存放原图到服务器
 		newimg, filetype, err := imagehelper.GetImgFromUrl(url)
 		if err != nil {
 			uc.log.Error(err)
 			return nil, err
 		}
+
+		// creates a bytes.Buffer and read from io.Reader
+		// imgdt, err := imagehelper.IoReaderToBytes(imgio)
+		// if err != nil {
+		// 	uc.log.Error(err)
+		// 	return nil, err
+		// }
+
+		// uc.log.Info("2222222222222")
+		// return &pb.CropImgReply{Imgdata: imgdt, Imgname: newname, Imagetype: filetype}, nil
 		newbyte, err := imagehelper.TransferImgToByte(newimg, filetype)
 		if err == nil {
 			_, ostorepath, err := uc.repo.StoreImgWithFtp(ctx, ftpinfo, oname, newbyte)

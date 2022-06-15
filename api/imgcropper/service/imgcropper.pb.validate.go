@@ -68,16 +68,7 @@ func (m *CropImgRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetWidth() < 1 {
-		err := CropImgRequestValidationError{
-			field:  "Width",
-			reason: "value must be greater than or equal to 1",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Width
 
 	// no validation rules for Refresh
 

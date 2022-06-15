@@ -32,7 +32,7 @@ func (s *ImgcropperService) CropImg(ctx context.Context, req *pb.CropImgRequest)
 	}
 	width := req.GetWidth()
 	if width < 1 {
-		width = 960
+		width = 0
 	}
 	return s.uc.CropImgBiz(ctx, req.GetUrl(), width)
 }
