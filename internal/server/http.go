@@ -1,12 +1,13 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/v2/middleware/ratelimit"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
 	v1 "imgcropper/api/imgcropper/service"
 	"imgcropper/internal/conf"
 	"imgcropper/internal/service"
+
+	"github.com/go-kratos/kratos/v2/middleware/ratelimit"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/middleware/validate"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -24,6 +25,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.ImgcropperService, logger lo
 			tracing.Server(),
 		),
 		http.ResponseEncoder(responseEncoder),
+		http.ErrorEncoder(responseErrorEncoder),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
