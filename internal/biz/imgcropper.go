@@ -191,7 +191,7 @@ func (uc *CropImgUsecase) CropImgBiz(ctx context.Context, url string, width int6
 		return &pb.CropImgReply{Imgdata: resizedimgbyte, Imgname: newname, Imagetype: filetype}, nil
 
 	} else {
-
+		// uc.log.Error("errerrerrerrerrerrerrerrerrerrerrerr")
 		imgio, filetype, err := imagehelper.GetImgFromUrlToBytes(url)
 		if err != nil {
 			uc.log.Error(err)
