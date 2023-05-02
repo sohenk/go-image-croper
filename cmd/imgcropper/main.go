@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	traceSdk "go.opentelemetry.io/otel/sdk/trace"
 	semConv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"os"
 
 	"imgcropper/internal/conf"
 
@@ -78,10 +79,10 @@ func main() {
 	}
 
 	//链路追踪
-	_, err := NewTracerProvider(bc.Trace, Name, Version, id)
-	if err != nil {
-		panic(err)
-	}
+	// _, err := NewTracerProvider(bc.Trace, Name, Version, id)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Filesystem, logger)
 	if err != nil {

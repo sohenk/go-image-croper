@@ -2,8 +2,10 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"imgcropper/internal/biz"
 	"imgcropper/pkg/filesystem/ftpdriver"
+	"imgcropper/pkg/rediscache"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"gorm.io/gorm"
@@ -34,29 +36,70 @@ func NewImgCropRepo(data *Data, logger log.Logger) biz.CropImgRepo {
 
 func (i *imgCropRepo) GetMd5Url(ctx context.Context, md5url string) bool {
 	//TODO implement me
-	imgcroplog := new(ImgCropLog)
-	rowsaffected := i.data.db.Where("md5_url = ?", md5url).Take(&imgcroplog).RowsAffected
-	if rowsaffected > 0 {
+	if i.GetMd5UrlFromCache(ctx, md5url) {
 		return true
 	}
+	imgcroplog := new(ImgCropLog)
+	rowsaffected := i.data.db.Where("md5_url = ?", md5url).Take(&imgcroplog).RowsAffected
+	return rowsaffected > 0
+}
+func (i *imgCropRepo) GetMd5UrlFromCache(ctx context.Context, md5url string) bool {
+	key := fmt.Sprintf("go_imagecropper:ismd5url:%s", md5url)
+	cacheresult, err := rediscache.Get[int](ctx, i.data.Rdb, key)
+	if err == nil {
+		return false
+	}
+	if cacheresult == 1 {
+		return true
+	}
+
 	return false
+}
+func (i *imgCropRepo) SetMd5UrlFromCache(ctx context.Context, md5url string) error {
+	key := fmt.Sprintf("go_imagecropper:ismd5url:%s", md5url)
+	err := rediscache.Set(ctx, i.data.Rdb, key, 1, 0)
+
+	return err
 }
 
 func (i *imgCropRepo) GetFileSize(ctx context.Context, md5url string, width int64) (*biz.ImgCropLog, error) {
+	cacheresult, err := i.GetFileSizeFromCache(ctx, md5url, width)
+	i.log.Debug("cacheresultxxx:", cacheresult)
+	if err == nil {
+		return cacheresult, nil
+	}
+
 	imgcroplog := new(ImgCropLog)
 	result := i.data.db.Where("md5_url = ? and width = ?", md5url, width).Take(&imgcroplog)
 	if result.RowsAffected > 0 {
-		return &biz.ImgCropLog{
+		rr := &biz.ImgCropLog{
 			Md5Url:    imgcroplog.Md5Url,
 			Source:    imgcroplog.Source,
 			Width:     imgcroplog.Width,
 			StorePath: imgcroplog.StorePath,
 			FileType:  imgcroplog.FileType,
-		}, nil
+		}
+		i.SetMd5UrlFromCache(ctx, imgcroplog.Md5Url)
+		i.SetFileSizeFromCache(ctx, rr)
+		return rr, nil
 	}
 	return nil, result.Error
 }
+func (i *imgCropRepo) GetFileSizeFromCache(ctx context.Context, md5url string, width int64) (*biz.ImgCropLog, error) {
+	key := fmt.Sprintf("go_imagecropper:md5url:%s:width:%d", md5url, width)
+	cacheresult, err := rediscache.Get[biz.ImgCropLog](ctx, i.data.Rdb, key)
+	if err != nil {
+		return nil, err
+	}
+	i.log.Debug("cacheresult:xxxxx:", cacheresult)
+	return &cacheresult, nil
 
+}
+func (i *imgCropRepo) SetFileSizeFromCache(ctx context.Context, cropLog *biz.ImgCropLog) error {
+	key := fmt.Sprintf("go_imagecropper:md5url:%s:width:%d", cropLog.Md5Url, cropLog.Width)
+	err := rediscache.Set(ctx, i.data.Rdb, key, cropLog, 0)
+	return err
+}
 func (i *imgCropRepo) CreateFileLog(ctx context.Context, cropLog *biz.ImgCropLog) error {
 
 	newcl := &ImgCropLog{
@@ -67,6 +110,8 @@ func (i *imgCropRepo) CreateFileLog(ctx context.Context, cropLog *biz.ImgCropLog
 		FileType:  cropLog.FileType,
 	}
 	result := i.data.db.Create(newcl)
+	i.SetFileSizeFromCache(ctx, cropLog)
+	i.SetMd5UrlFromCache(ctx, cropLog.Md5Url)
 	if result.Error != nil {
 		i.log.Errorf("创建记录失败%s", result.Error)
 		return errors.New(500, "错误", "创建用户失败")

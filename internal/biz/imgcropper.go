@@ -20,7 +20,7 @@ import (
 
 var (
 // ErrUserNotFound is user not found.
-//ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
+// ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
 type CropImg struct {
@@ -44,6 +44,11 @@ type CropImgRepo interface {
 
 	StoreImgWithFtp(ctx context.Context, ftp *ftpdriver.FtpInfo, filename string, imagedata []byte) (url, storepath string, err error)
 	GetImgFromDiskWithFtp(ctx context.Context, ftp *ftpdriver.FtpInfo, storePath string) (imagedata []byte, err error)
+
+	GetFileSizeFromCache(ctx context.Context, md5url string, width int64) (*ImgCropLog, error)
+	SetFileSizeFromCache(ctx context.Context, cropLog *ImgCropLog) error
+	SetMd5UrlFromCache(ctx context.Context, md5url string) error
+	GetMd5UrlFromCache(ctx context.Context, md5url string) bool
 }
 
 type CropImgUsecase struct {

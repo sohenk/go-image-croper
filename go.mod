@@ -4,7 +4,10 @@ go 1.18
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.7
+	github.com/fogleman/gg v1.3.0
 	github.com/go-kratos/kratos/v2 v2.5.0
+	github.com/go-redis/redis/extra/redisotel v0.3.0
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/wire v0.5.0
 	github.com/jlaffaye/ftp v0.1.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
@@ -19,13 +22,15 @@ require (
 )
 
 require (
-	github.com/fogleman/gg v1.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-kratos/aegis v0.1.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
+	github.com/go-redis/redis/extra/rediscmd v0.2.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

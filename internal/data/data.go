@@ -1,35 +1,60 @@
 package data
 
 import (
-	"gorm.io/gorm"
 	"imgcropper/internal/conf"
 	"imgcropper/pkg/filesystem/ftpdriver"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-redis/redis/extra/redisotel"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewDataBase, NewFtpClient, NewImgCropRepo)
+var ProviderSet = wire.NewSet(NewData, NewDataBase, NewFtpClient,
+	NewRedisClient, NewImgCropRepo)
 
 // Data .
 type Data struct {
 	// TODO wrapped database client
 	db  *gorm.DB
+	Rdb *redis.Client
 	ftp *ftpdriver.FtpInfo
 	log *log.Helper
 }
 
+func NewRedisClient(conf *conf.Data, logger log.Logger) *redis.Client {
+	l := log.NewHelper(log.With(logger, "module", "redis/data/dolottery-service"))
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:         conf.Redis.Addr,
+		Password:     conf.Redis.Password,
+		DB:           int(conf.Redis.Db),
+		DialTimeout:  conf.Redis.DialTimeout.AsDuration(),
+		WriteTimeout: conf.Redis.WriteTimeout.AsDuration(),
+		ReadTimeout:  conf.Redis.ReadTimeout.AsDuration(),
+	})
+	if rdb == nil {
+		l.Fatalf("failed opening connection to redis")
+	}
+	rdb.AddHook(redisotel.TracingHook{})
+
+	return rdb
+}
+
 // NewData .
-func NewData(c *conf.Data, logger log.Logger, db *gorm.DB, ftp *ftpdriver.FtpInfo) (*Data, func(), error) {
+func NewData(c *conf.Data, logger log.Logger, db *gorm.DB, ftp *ftpdriver.FtpInfo, rdb *redis.Client) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 	}
 	return &Data{
 		db:  db,
 		ftp: ftp,
+		Rdb: rdb,
 		log: log.NewHelper(log.With(logger, "module", "data/imgcrop")),
 	}, cleanup, nil
 }
@@ -61,9 +86,9 @@ func NewDataBase(c *conf.Data) (*gorm.DB, error) {
 	}
 	// 设置连接池
 	// 空闲
-	sqlDb.SetMaxIdleConns(50)
+	sqlDb.SetMaxIdleConns(150)
 	// 打开
-	sqlDb.SetMaxOpenConns(100)
+	sqlDb.SetMaxOpenConns(500)
 	// 超时
 	sqlDb.SetConnMaxLifetime(time.Second * 30)
 	err = DBAutoMigrate(db)
