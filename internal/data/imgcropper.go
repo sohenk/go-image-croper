@@ -64,7 +64,7 @@ func (i *imgCropRepo) SetMd5UrlFromCache(ctx context.Context, md5url string) err
 
 func (i *imgCropRepo) GetFileSize(ctx context.Context, md5url string, width int64) (*biz.ImgCropLog, error) {
 	cacheresult, err := i.GetFileSizeFromCache(ctx, md5url, width)
-	i.log.Debug("cacheresultxxx:", cacheresult)
+	// i.log.Debug("cacheresultxxx:", cacheresult)
 	if err == nil {
 		return cacheresult, nil
 	}
